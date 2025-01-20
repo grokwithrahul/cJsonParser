@@ -1,3 +1,6 @@
+#ifndef TOKEN_H
+#define TOKEN_H
+
 typedef enum {
   ERROR,
   ILLEGAL,
@@ -13,4 +16,4 @@ typedef enum {
 typedef struct {
   TokenType type;
   char literal[256];
-}
+} Token;
