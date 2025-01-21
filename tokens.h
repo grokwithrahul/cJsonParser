@@ -1,5 +1,6 @@
-#ifndef TOKEN_H
-#define TOKEN_H
+#ifndef TOKENS_H
+#define TOKENS_H
+#endif
 
 typedef enum {
   ERROR,
