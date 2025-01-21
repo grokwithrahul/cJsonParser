@@ -11,8 +11,8 @@ typedef struct {
 } Lexer;
 
 void readCharacter(Lexer *t) {
-  if((t->position+1) >= t->inputSize) {
-    t->currentChar=0;
+  if((t->position) >= t->inputSize) {
+    t->currentChar='\0';
   } else {
     t->currentChar=t->input[t->position];
   }
@@ -22,30 +22,29 @@ void readCharacter(Lexer *t) {
 void lex(Lexer *t) {
   char **tokenList = NULL;
   int tokenCount = 0;
-  printf("got here");
-  while(t->currentChar!=0) {
+  
+  while((t->currentChar)!='\0') {
     readCharacter(t);
-    //if (currentCharacter == TokenType.String) {
+  //if (currentCharacter == TokenType.String) {
       
     //}
     //else {
-    tokenList = (char **)realloc(tokenList, sizeof(char)*(tokenCount+1));
-    tokenList[t->position] = (char *)malloc(2*sizeof(char));
-    tokenList[t->position][0] = t->currentChar;
-    tokenList[t->position][1] = '\0';
-    tokenCount++;
-    printf("%d\n", tokenCount);  
+    if(!(t->currentChar=='\0')) {
+      tokenList = realloc(tokenList, sizeof(char*)*(tokenCount+1));
+      tokenList[tokenCount] = malloc(2*sizeof(char));
+      tokenList[tokenCount][0] = t->currentChar;
+      tokenList[tokenCount][1] = '\0';
+      tokenCount=t->position;
+    }
   }
     //}
-  printf("done lexing"); 
-  for (int i = 0; i < tokenCount; i++) {
-    printf("%s", tokenList[i]);
+  for (int i = 0; i <= t->inputSize-1; i++) {
+    printf("'%s', ", tokenList[i]);
   }
- // printf("%ld", sizeof(tokenCount));
 }
 
 int main(){
-  const char *json_data = "{"
+  char *json_data = "{"
     "\"id\": 101,"
     "\"name\": \"John Doe\","
     "\"email\": \"john.doe@example.com\","
@@ -68,10 +67,12 @@ int main(){
     "]"
     "}";
   Lexer t;
-  t.currentChar = 0;
+  t.currentChar = '0';
   t.position = 0;
   t.inputSize = strlen(json_data);
   t.input = (char *)malloc(t.inputSize + 1);
+  t.input = json_data;
   Lexer *t_ptr = &t;
   lex(t_ptr);
+  return 0;
 }
