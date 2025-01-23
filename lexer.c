@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 typedef struct {
   int position;
@@ -31,6 +32,23 @@ void readJsonString(Lexer *t, char **jsonString, int *stringLength) {
   }
 }
 
+void readJsonInteger(Lexer *t, int *jsonInteger) {
+    int isNegative = 0;
+    if ((t->input[t->position-1]) == '-') {
+        isNegative = 1;
+        readCharacter(t);
+    }
+
+    while (isdigit(t->currentChar)) {
+        *jsonInteger = ((*jsonInteger) * 1) + (t->currentChar - '0');
+        readCharacter(t);
+    }
+
+    if (isNegative) {
+        *jsonInteger = -(*jsonInteger);
+    }
+}
+
 void lex(Lexer *t) {
   char **tokenList = NULL;
   int tokenCount = 0;
@@ -45,18 +63,27 @@ void lex(Lexer *t) {
         tokenList[tokenCount][1] = '\0';
         tokenCount++;
       }
-    } else {
-      char *jsonString = malloc(1 * sizeof(char));
-      int strLength = 0;
-      readJsonString(t, &jsonString, &strLength);
-      tokenList = realloc(tokenList, (tokenCount+1)*sizeof(char*));
-      tokenList[tokenCount] = strdup(jsonString);
-      tokenCount++;
+    } else if (t->currentChar=='"') {
+        char *jsonString = malloc(1 * sizeof(char));
+        int strLength = 0;
+        readJsonString(t, &jsonString, &strLength);
+        tokenList = realloc(tokenList, (tokenCount+1)*sizeof(char*));
+        tokenList[tokenCount] = strdup(jsonString);
+        free(jsonString);
+        tokenCount++;
+    } else if (isdigit(t->currentChar)) {
+        int jsonInteger = 0;
+        readJsonInteger(t, &jsonInteger);
+        tokenList = realloc(tokenList, (tokenCount+1)*sizeof(char*));
+        tokenList[tokenCount] = malloc(20 * sizeof(char));
+        printf("'%d'", jsonInteger);
+        sprintf(tokenList[tokenCount], "%d", jsonInteger);
+        tokenCount++;
     }
   }
-  for (int i = 0; i < tokenCount-1; i++) {
-    printf("'%s', ", tokenList[i]);
-  }
+//  for (int i = 0; i < tokenCount-1; i++) {
+//    printf("'%s', ", tokenList[i]);
+//  }
 }
 
 int main(){
