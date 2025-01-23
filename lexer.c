@@ -54,7 +54,7 @@ void lex(Lexer *t) {
       tokenCount++;
     }
   }
-  for (int i = 0; i <= t->inputSize-1; i++) {
+  for (int i = 0; i < tokenCount-1; i++) {
     printf("'%s', ", tokenList[i]);
   }
 }
