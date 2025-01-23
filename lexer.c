@@ -18,11 +18,16 @@ void readCharacter(Lexer *t) {
   t->position++;
 }
 
-void readJsonString(Lexer *t, char jsonString[]) {
+void readJsonString(Lexer *t, char **jsonString, int *stringLength) {
   readCharacter(t);
   if(!(t->currentChar=='"')) {
-    strcat(jsonString, t->currentChar);
-    readJsonString(t, jsonString);
+    (*stringLength)++;
+    *jsonString = realloc(*jsonString, (sizeof(char)*(*stringLength+1)));
+    (*jsonString)[(*stringLength)-1] = t->currentChar;
+    (*jsonString)[(*stringLength)] = '\0';
+    readJsonString(t, jsonString, stringLength);
+  } else {
+    *stringLength = 0;
   }
 }
 
@@ -41,11 +46,12 @@ void lex(Lexer *t) {
         tokenCount++;
       }
     } else {
-      char *jsonString;
-      readJsonString(t, jsonString);
+      char *jsonString = malloc(1 * sizeof(char));
+      int strLength = 0;
+      readJsonString(t, &jsonString, &strLength);
       tokenList = realloc(tokenList, (tokenCount+1)*sizeof(char*));
       tokenList[tokenCount] = strdup(jsonString);
-      tokenList++;
+      tokenCount++;
     }
   }
   for (int i = 0; i <= t->inputSize-1; i++) {
