@@ -1,4 +1,3 @@
-#include "tokens.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,26 +18,43 @@ void readCharacter(Lexer *t) {
   t->position++;
 }
 
+void readJsonString(Lexer *t, char **jsonString, int *stringLength) {
+  readCharacter(t);
+  if(!(t->currentChar=='"')) {
+    (*stringLength)++;
+    *jsonString = realloc(*jsonString, (sizeof(char)*(*stringLength+1)));
+    (*jsonString)[(*stringLength)-1] = t->currentChar;
+    (*jsonString)[(*stringLength)] = '\0';
+    readJsonString(t, jsonString, stringLength);
+  } else {
+    *stringLength = 0;
+  }
+}
+
 void lex(Lexer *t) {
   char **tokenList = NULL;
   int tokenCount = 0;
   
   while((t->currentChar)!='\0') {
     readCharacter(t);
-  //if (currentCharacter == TokenType.String) {
-      
-    //}
-    //else {
-    if(!(t->currentChar=='\0')) {
-      tokenList = realloc(tokenList, sizeof(char*)*(tokenCount+1));
-      tokenList[tokenCount] = malloc(2*sizeof(char));
-      tokenList[tokenCount][0] = t->currentChar;
-      tokenList[tokenCount][1] = '\0';
-      tokenCount=t->position;
+    if (!(t->currentChar=='"')) {  
+      if(!(t->currentChar=='\0')) {
+        tokenList = realloc(tokenList, sizeof(char*)*(tokenCount+1));
+        tokenList[tokenCount] = malloc(2*sizeof(char));
+        tokenList[tokenCount][0] = t->currentChar;
+        tokenList[tokenCount][1] = '\0';
+        tokenCount++;
+      }
+    } else {
+      char *jsonString = malloc(1 * sizeof(char));
+      int strLength = 0;
+      readJsonString(t, &jsonString, &strLength);
+      tokenList = realloc(tokenList, (tokenCount+1)*sizeof(char*));
+      tokenList[tokenCount] = strdup(jsonString);
+      tokenCount++;
     }
   }
-    //}
-  for (int i = 0; i <= t->inputSize-1; i++) {
+  for (int i = 0; i < tokenCount-1; i++) {
     printf("'%s', ", tokenList[i]);
   }
 }
