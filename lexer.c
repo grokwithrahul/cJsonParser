@@ -35,12 +35,12 @@ void readJsonString(Lexer *t, char **jsonString, int *stringLength) {
 void readJsonInteger(Lexer *t, int *jsonInteger) {
     int isNegative = 0;
     if ((t->input[t->position-1]) == '-') {
-        isNegative = 1;
-        readCharacter(t);
+      isNegative = 1;
+      readCharacter(t);
+      printf("nc");
     }
-
     while (isdigit(t->currentChar)) {
-        *jsonInteger = ((*jsonInteger) * 1) + (t->currentChar - '0');
+        *jsonInteger = ((*jsonInteger) * 10) + (t->currentChar-'0');
         readCharacter(t);
     }
 
@@ -56,12 +56,19 @@ void lex(Lexer *t) {
   while((t->currentChar)!='\0') {
     readCharacter(t);
     if (!(t->currentChar=='"')) {  
-      if(!(t->currentChar=='\0')) {
-        tokenList = realloc(tokenList, sizeof(char*)*(tokenCount+1));
-        tokenList[tokenCount] = malloc(2*sizeof(char));
-        tokenList[tokenCount][0] = t->currentChar;
-        tokenList[tokenCount][1] = '\0';
+      if(isdigit((t->currentChar))) {
+        int jsonInteger = 0;
+        readJsonInteger(t, &jsonInteger);
+        tokenList = realloc(tokenList, (tokenCount+1)*sizeof(char*));
+        tokenList[tokenCount] = malloc(20 * sizeof(char));
+        sprintf(tokenList[tokenCount], "%d", jsonInteger);
         tokenCount++;
+      } else if (!(t->currentChar=='\0')) {
+          tokenList = realloc(tokenList, sizeof(char*)*(tokenCount+1));
+          tokenList[tokenCount] = malloc(2*sizeof(char));
+          tokenList[tokenCount][0] = t->currentChar;
+          tokenList[tokenCount][1] = '\0';
+          tokenCount++;
       }
     } else if (t->currentChar=='"') {
         char *jsonString = malloc(1 * sizeof(char));
@@ -71,19 +78,11 @@ void lex(Lexer *t) {
         tokenList[tokenCount] = strdup(jsonString);
         free(jsonString);
         tokenCount++;
-    } else if (isdigit(t->currentChar)) {
-        int jsonInteger = 0;
-        readJsonInteger(t, &jsonInteger);
-        tokenList = realloc(tokenList, (tokenCount+1)*sizeof(char*));
-        tokenList[tokenCount] = malloc(20 * sizeof(char));
-        printf("'%d'", jsonInteger);
-        sprintf(tokenList[tokenCount], "%d", jsonInteger);
-        tokenCount++;
     }
   }
-//  for (int i = 0; i < tokenCount-1; i++) {
-//    printf("'%s', ", tokenList[i]);
-//  }
+  for (int i = 0; i < tokenCount-1; i++) {
+    printf("'%s', ", tokenList[i]);
+  }
 }
 
 int main(){
