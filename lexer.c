@@ -56,6 +56,9 @@ void lex(Lexer *t) {
   while((t->currentChar)!='\0') {
     readCharacter(t);
     if (!(t->currentChar=='"')) {  
+      if(t->currentChar==' ') {
+        continue;
+      }
       if(isdigit((t->currentChar))) {
         int jsonInteger = 0;
         readJsonInteger(t, &jsonInteger);
