@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 
 typedef struct {
   int position;
@@ -31,6 +32,23 @@ void readJsonString(Lexer *t, char **jsonString, int *stringLength) {
   }
 }
 
+void readJsonInteger(Lexer *t, int *jsonInteger) {
+    int isNegative = 0;
+    if ((t->input[t->position-1]) == '-') {
+      isNegative = 1;
+      readCharacter(t);
+      printf("nc");
+    }
+    while (isdigit(t->currentChar)) {
+        *jsonInteger = ((*jsonInteger) * 10) + (t->currentChar-'0');
+        readCharacter(t);
+    }
+
+    if (isNegative) {
+        *jsonInteger = -(*jsonInteger);
+    }
+}
+
 void lex(Lexer *t) {
   char **tokenList = NULL;
   int tokenCount = 0;
@@ -38,20 +56,28 @@ void lex(Lexer *t) {
   while((t->currentChar)!='\0') {
     readCharacter(t);
     if (!(t->currentChar=='"')) {  
-      if(!(t->currentChar=='\0')) {
-        tokenList = realloc(tokenList, sizeof(char*)*(tokenCount+1));
-        tokenList[tokenCount] = malloc(2*sizeof(char));
-        tokenList[tokenCount][0] = t->currentChar;
-        tokenList[tokenCount][1] = '\0';
+      if(isdigit((t->currentChar))) {
+        int jsonInteger = 0;
+        readJsonInteger(t, &jsonInteger);
+        tokenList = realloc(tokenList, (tokenCount+1)*sizeof(char*));
+        tokenList[tokenCount] = malloc(20 * sizeof(char));
+        sprintf(tokenList[tokenCount], "%d", jsonInteger);
         tokenCount++;
+      } else if (!(t->currentChar=='\0')) {
+          tokenList = realloc(tokenList, sizeof(char*)*(tokenCount+1));
+          tokenList[tokenCount] = malloc(2*sizeof(char));
+          tokenList[tokenCount][0] = t->currentChar;
+          tokenList[tokenCount][1] = '\0';
+          tokenCount++;
       }
-    } else {
-      char *jsonString = malloc(1 * sizeof(char));
-      int strLength = 0;
-      readJsonString(t, &jsonString, &strLength);
-      tokenList = realloc(tokenList, (tokenCount+1)*sizeof(char*));
-      tokenList[tokenCount] = strdup(jsonString);
-      tokenCount++;
+    } else if (t->currentChar=='"') {
+        char *jsonString = malloc(1 * sizeof(char));
+        int strLength = 0;
+        readJsonString(t, &jsonString, &strLength);
+        tokenList = realloc(tokenList, (tokenCount+1)*sizeof(char*));
+        tokenList[tokenCount] = strdup(jsonString);
+        free(jsonString);
+        tokenCount++;
     }
   }
   for (int i = 0; i < tokenCount-1; i++) {
