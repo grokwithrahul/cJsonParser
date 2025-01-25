@@ -73,6 +73,14 @@ void lex(Lexer *t) {
           readCharacter(t);
           readCharacter(t);
           tokenCount++;
+      }else if (t->currentChar == 'f') {
+          tokenList = realloc(tokenList, (tokenCount + 1) * sizeof(char *));
+          tokenList[tokenCount] = strdup("false");
+          readCharacter(t);
+          readCharacter(t);
+          readCharacter(t);
+          readCharacter(t);
+          tokenCount++;
       } else if (!(t->currentChar == '\0')) {
           tokenList = realloc(tokenList, sizeof(char *) * (tokenCount + 1));
           tokenList[tokenCount] = malloc(2 * sizeof(char));
@@ -106,7 +114,7 @@ int main() {
     "\"id\": 101,"
     "\"name\": \"John Doe\","
     "\"email\": \"john.doe@example.com\","
-    "\"active\": true,"
+    "\"active\": false,"
     "\"address\": {"
     "\"street\": \"123 Main St\","
     "\"city\": \"Anytown\","
