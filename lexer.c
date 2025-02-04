@@ -104,7 +104,7 @@ void lex(Lexer *t) {
       readCharacter(t);
     }
   }
-  for (int i = 0; i < tokenCount - 1; i++) {
+  for (int i = 0; i < tokenCount ; i++) {
     printf("'%s', ", tokenList[i]);
   }
 }
