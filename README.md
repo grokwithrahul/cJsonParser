@@ -1,2 +1,2 @@
-# jCerializee
-A recursive-descent JSON parser written in C
+# jCerialize
+A recursive-descent JSON lexer/parser written in C
