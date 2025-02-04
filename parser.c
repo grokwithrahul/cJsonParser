@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
+#include <stdbool.h>
 
 typedef enum { 
   JSON_OBJECT, JSON_ARRAY, JSON_STRING, JSON_NUMBER, JSON_BOOL 
@@ -180,6 +181,59 @@ JsonNode* json_parse_bool(const char **tokens, size_t *index) {
   return NULL;
 }
 
+void json_print(JsonNode *node, int indent_level) {
+  if (!node) return;
+
+  // Print indentation
+  for (int i = 0; i < indent_level; i++) {
+    printf("  ");
+  }
+
+  switch (node->type) {
+    case JSON_OBJECT:
+      printf("{\n");
+      for (size_t i = 0; i < node->value.object.size; i++) {
+        for (int j = 0; j < indent_level + 1; j++) {
+          printf("  ");
+        }
+        printf("\"%s\": ", node->value.object.keys[i]);
+        json_print(node->value.object.values[i], indent_level + 1);
+        if (i < node->value.object.size - 1) {
+          printf(",");
+        }
+        printf("\n");
+      }
+      for (int i = 0; i < indent_level; i++) {
+        printf("  ");
+      }
+      printf("}\n");
+      break;
+    case JSON_ARRAY:
+      printf("[\n");
+      for (size_t i = 0; i < node->value.array.size; i++) {
+        json_print(node->value.array.elements[i], indent_level + 1);
+        if (i < node->value.array.size - 1) {
+          printf(",");
+        }
+        printf("\n");
+      }
+      for (int i = 0; i < indent_level; i++) {
+        printf("  ");
+      }
+      printf("]\n");
+      break;
+    case JSON_STRING:
+      printf("\"%s\"\n", node->value.string);
+      break;
+    case JSON_NUMBER:
+      printf("%f\n", node->value.number);
+      break;
+    case JSON_BOOL:
+      printf("%s\n", node->value.boolean ? "true" : "false");
+      break;
+  }
+}
+
 void json_free(JsonNode *node) {
   if (!node) return;
   if (node->type == JSON_OBJECT) {
@@ -210,6 +264,7 @@ int main() {
 
   if (root) {
     printf("Parsed JSON object successfully!\n");
+    json_print(root, 0);  // Print the tree with indent level 0
     json_free(root);
   } else {
     printf("Failed to parse JSON.\n");
